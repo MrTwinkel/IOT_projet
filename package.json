@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "serialport": "^7.1.5",
+    "socket.io": "^1.4.8",
+    "xbee": "^0.0.4",
+    "xbee-api": "^0.6.0"
+  }
+}
