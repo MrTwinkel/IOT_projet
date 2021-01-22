@@ -5,7 +5,7 @@ var xbee_api = require('xbee-api');
 var C = xbee_api.constants;
 
 //////// Definition du Variable ///////
-const port = "COM6";
+const port_USB = "COM6";
 
 ////////////////     FIN      ////////////
 
@@ -15,7 +15,7 @@ var xbeeAPI = new xbee_api.XBeeAPI({
 });
 
 
-let serialport = new SerialPort(port, {
+let serialport = new SerialPort(port_USB, {
   baudRate: 9600,
 }, function (err) {
   if (err) {
@@ -31,17 +31,20 @@ serialport.on("open", function () {
     type: C.FRAME_TYPE.AT_COMMAND,
     command: "NI",
     commandParameter: [],
+    
   };
-
+  
   xbeeAPI.builder.write(frame_obj);
-
+  
   frame_obj = { // AT Request to be sent
     type: C.FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST,
     destination64: "FFFFFFFFFFFFFFFF",
     command: "NI",
     commandParameter: [],
-  };
-  xbeeAPI.builder.write(frame_obj);
+};
+xbeeAPI.builder.write(frame_obj);
+
+//console.log(frame_obj);
 
 });
 
@@ -61,7 +64,9 @@ xbeeAPI.parser.on("data", function (frame) {
     browserClient && browserClient.emit('pad-event', {
       device: frame.remote64,
       data: dataReceived
+      
     });
+    
   }
 
   if (C.FRAME_TYPE.NODE_IDENTIFICATION === frame.type) {
@@ -70,15 +75,23 @@ xbeeAPI.parser.on("data", function (frame) {
 
 
   } else if (C.FRAME_TYPE.ZIGBEE_IO_DATA_SAMPLE_RX === frame.type) {
-
+    //console.debug(C.FRAME_TYPE.ZIGBEE_IO_DATA_SAMPLE_RX );
 
 
   } else if (C.FRAME_TYPE.REMOTE_COMMAND_RESPONSE === frame.type) {
-    
-  } else {
+  } else if (C.FRAME_TYPE.AT_COMMAND_RESPONSE === frame.type) {
+
+    console.debug("c'est la reponse locale");
     console.debug(frame);
     let dataReceived = String.fromCharCode.apply(null, frame.commandData)
-    console.log(dataReceived);
+    console.debug(dataReceived);
+
+  } else {
+    console.debug("frame");
+
+    console.debug(frame);
+    let dataReceived = String.fromCharCode.apply(null, frame.commandData)
+    console.debug(dataReceived);
   }
 
 });
@@ -102,29 +115,6 @@ io.on('connection', (client) => {
     console.log("Client disconnected");
   });
 });
-
 const port = 8000;
 io.listen(port);
 console.log('listening on port ', port);
-//
-// serial_xbee.on("data", function(data) {
-//     console.log(data.type);
-//   // console.log('xbee data received:', data.type);
-//   // client.emit('timer', "pouet");
-// //
-// });
-
-// shepherd.on('ready', function () {
-//   console.log('Server is ready.');
-//
-//   // allow devices to join the network within 60 secs
-//   shepherd.permitJoin(60, function (err) {
-//     if (err)
-//       console.log(err);
-//   });
-// });
-//
-// shepherd.start(function (err) {                // start the server
-//   if (err)
-//     console.log(err);
-// });
