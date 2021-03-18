@@ -1,13 +1,11 @@
-
+var Storage = require("./Storage");
 const io = require('socket.io')();
 var SerialPort = require('serialport');
 var xbee_api = require('xbee-api');
 var C = xbee_api.constants;
 
-//////// Definition du Variable ///////
-const port_USB = "COM6";
 
-////////////////     FIN      ////////////
+const port_USB = "COM9";
 
 
 var xbeeAPI = new xbee_api.XBeeAPI({
@@ -70,13 +68,14 @@ xbeeAPI.parser.on("data", function (frame) {
   }
 
   if (C.FRAME_TYPE.NODE_IDENTIFICATION === frame.type) {
-    // let dataReceived = String.fromCharCode.apply(null, frame.nodeIdentifier);
-    // console.log(">> ZIGBEE_RECEIVE_PACKET >", frame);
+    console.log("NODE_IDENTIFICATION");
+    Storage.registerSensor(frame.remote64)
 
 
   } else if (C.FRAME_TYPE.ZIGBEE_IO_DATA_SAMPLE_RX === frame.type) {
-    //console.debug(C.FRAME_TYPE.ZIGBEE_IO_DATA_SAMPLE_RX );
-
+    console.log("ZIGBEE_IO_DATA_SAMPLE_RX")
+    console.log(frame.analogSamples.AD3);
+    Storage.registerSample(frame.remote64,frame.analogSamples.AD3)
 
   } else if (C.FRAME_TYPE.REMOTE_COMMAND_RESPONSE === frame.type) {
   } else if (C.FRAME_TYPE.AT_COMMAND_RESPONSE === frame.type) {
